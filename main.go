@@ -3,13 +3,14 @@ package main
 import (
 	"github.com/gorilla/websocket"
 	"log"
-	"net/http")
+	"net/http"
+)
 
 type Message struct {
 	msg string
 }
 
-var upgrader = websocket.Upgrader {
+var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }

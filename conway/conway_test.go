@@ -1,8 +1,8 @@
 package conway
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestToString(t *testing.T) {
@@ -50,7 +50,7 @@ func TestBasicSetupWithSeed(t *testing.T) {
 	}
 }
 
-func TestReaperWithCellsInTheCenter(t *testing.T) {
+func TestReaperWithBlock(t *testing.T) {
 	boardSize := 10
 
 	board := Board{}
@@ -63,8 +63,83 @@ func TestReaperWithCellsInTheCenter(t *testing.T) {
 
 	board.InitWithSeed(boardSize, seed)
 	board.Reaper()
-	if board.cell(4, 4) != alive || board.cell(5, 5) != alive || board.cell(4, 5) != alive || board.cell(5, 4) != alive {
+	if !(board.cell(4, 4) == alive && board.cell(5, 5) == alive && board.cell(4, 5) == alive && board.cell(5, 4) == alive) {
 		t.Errorf("Board was incorrectly modified by reaper")
+	}
+}
+
+func TestReaperWithBlinker(t *testing.T) {
+	boardSize := 10
+
+	board := Board{}
+	seed := createSeed(boardSize)
+
+	seed[4][5] = alive
+	seed[5][5] = alive
+	seed[6][5] = alive
+
+	board.InitWithSeed(boardSize, seed)
+	if !(board.cell(4, 5) == alive && board.cell(5, 5) == alive && board.cell(6, 5) == alive) {
+		t.Errorf("Board was incorrectly initialized [%d] [%d] [%d]", board.cell(4, 5), board.cell(5, 5), board.cell(6, 5))
+	}
+
+	board.Reaper()
+	if !(board.cell(5, 4) == alive && board.cell(5, 5) == alive && board.cell(5, 6) == alive) {
+		t.Errorf("Board was incorrectly modified by reaper [%d] [%d] [%d]", board.cell(5, 4), board.cell(5, 5), board.cell(5, 6))
+	}
+}
+
+func BenchmarkBlinker(b *testing.B) {
+	boardSize := 10
+
+	board := Board{}
+	seed := createSeed(boardSize)
+
+	seed[4][5] = alive
+	seed[5][5] = alive
+	seed[6][5] = alive
+
+	board.InitWithSeed(boardSize, seed)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		board.Reaper()
+	}
+}
+
+func BenchmarkBlock(b *testing.B) {
+	boardSize := 10
+
+	board := Board{}
+	seed := createSeed(boardSize)
+
+	seed[4][4] = alive
+	seed[4][5] = alive
+	seed[5][5] = alive
+	seed[5][4] = alive
+
+	board.InitWithSeed(boardSize, seed)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		board.Reaper()
+	}
+}
+
+func BenchmarkFullBoard(b *testing.B) {
+	boardSize := 10
+
+	board := Board{}
+	seed := createSeed(boardSize)
+
+	for x, _ := range seed {
+		for y, _ := range seed[x] {
+			seed[x][y] = alive
+		}
+	}
+
+	board.InitWithSeed(boardSize, seed)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		board.Reaper()
 	}
 }
 
