@@ -1,47 +1,57 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-)
+	"github.com/gorilla/websocket"
+	"log"
+	"net/http")
 
-type Display struct {}
-type Increment struct {}
+type Message struct {
+	msg string
+}
 
-func handle(channel chan interface{}) {
-	idx := 0
+var upgrader = websocket.Upgrader {
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func echo(conn *websocket.Conn) error {
 	for {
-		req := <-channel
-		switch t := req.(type) {
-		case *Display:
-			fmt.Println(idx)
-		case *Increment:
-			idx = idx+1
-		default:
-			fmt.Printf("I don't know what to do with %T", t)
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			return nil
+		}
+		msg := string(p)
+		var rsp = ""
+		if msg == "Ping" {
+			rsp = "Pong"
+		} else {
+			rsp = msg
+		}
+		log.Printf("RQ: %s RS: %s", msg, rsp)
+		if err = conn.WriteMessage(messageType, []byte(rsp)); err != nil {
+			return err
 		}
 	}
 }
 
 func main() {
-	var allChannels []chan interface{}
+	log.Println("starting...")
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/index.html")
+	})
 
-	http.HandleFunc("/channel", func(w http.ResponseWriter, r *http.Request) {
-		newChannel := make(chan interface{})
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
-		go handle(newChannel)
-		allChannels = append(allChannels, newChannel)
-		fmt.Println("No of channels:", len(allChannels))
+		go echo(conn)
 	})
-	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		for i := 0; i < len(allChannels); i++ {
-			allChannels[i]<- new(Increment)
-		}
-	})
-	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
-		for i := 0; i < len(allChannels); i++ {
-			allChannels[i] <- new(Display)
-		}
-	})
-	http.ListenAndServe(":8080", nil)
+
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
