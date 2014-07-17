@@ -57,9 +57,6 @@ func main() {
 	})
 
 	host := os.Getenv("HOST")
-	if host == "" {
-		host = "localhost"
-	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

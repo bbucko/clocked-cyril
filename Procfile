@@ -1,1 +1,1 @@
-web: clocked-cyril -port=$PORT
+web: clocked-cyril
