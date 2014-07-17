@@ -1,0 +1,10 @@
+{
+	"ImportPath": "github.com/bbucko/clocked-cyril",
+	"GoVersion": "go1.3",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "aef42a8ae63a680a8c5d4ca25b01ca57a97ffa5c"
+		}
+	]
+}
