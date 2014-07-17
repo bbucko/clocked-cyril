@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var connection = new WebSocket('ws://localhost:8080/ws');
+//            connection.onopen = function () {
+//                connection.send('Ping');
+//            };
+            connection.onerror = function (error) {
+                console.log('WebSocket Error ' + error);
+            };
+
+            // Log messages from the server
+            connection.onmessage = function (e) {
+                console.log('WebSocket Message ' + e.data);
+            };
+        });
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+        }
+    </style>
+    <script src="/js/pixi.dev.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    // You can use either PIXI.WebGLRenderer or PIXI.CanvasRenderer
+    var renderer = new PIXI.WebGLRenderer(800, 600);
+
+    document.body.appendChild(renderer.view);
+
+    var stage = new PIXI.Stage;
+
+    var bunnyTexture = PIXI.Texture.fromImage("img/bunny.png");
+    var bunny = new PIXI.Sprite(bunnyTexture);
+
+    bunny.position.x = 400;
+    bunny.position.y = 300;
+
+    bunny.scale.x = 2;
+    bunny.scale.y = 2;
+
+    stage.addChild(bunny);
+
+    requestAnimationFrame(animate);
+
+    function animate() {
+        bunny.rotation += 0.01;
+
+        renderer.render(stage);
+
+        requestAnimationFrame(animate);
+    }
+</script>
+
+</html>

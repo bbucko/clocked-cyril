@@ -13,6 +13,9 @@ type Message struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin : func(r *http.Request) bool {
+		return true
+	},
 }
 
 func echo(conn *websocket.Conn) error {
@@ -37,10 +40,10 @@ func echo(conn *websocket.Conn) error {
 
 func main() {
 	log.Println("starting...")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/index.html")
-	})
 
+	http.Handle("/", http.FileServer(http.Dir("./web/")))
+	http.Handle("/js", http.FileServer(http.Dir("./web/js/")))
+	http.Handle("/img", http.FileServer(http.Dir("./web/img/")))
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
