@@ -4,6 +4,8 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"fmt"
+	"os"
 )
 
 type Message struct {
@@ -54,7 +56,17 @@ func main() {
 		go echo(conn)
 	})
 
-	err := http.ListenAndServe(":8080", nil)
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	bind := fmt.Sprintf("%s:%s", host, port)
+	log.Println("Starting server on", bind)
+	err := http.ListenAndServe(bind, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
