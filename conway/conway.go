@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"log"
 	"strconv"
+	"flag"
 )
 
 type Cell int
+
+var debug *bool = flag.Bool("debug", false, "enable debug logging")
 
 const (
 	empty = 0
 	alive = 1
 	dead  = 2
-
-	debug = false
 )
 
 type Board struct {
@@ -116,7 +117,7 @@ func (b Board) String() string {
 }
 
 func debugf(format string, v ...interface{}) {
-	if debug {
-		log.Printf(format, v)
+	if *debug {
+		log.Printf("DEBUG :: "+format, v)
 	}
 }

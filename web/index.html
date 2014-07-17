@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var connection = new WebSocket('ws://localhost:8080/ws');
+//            connection.onopen = function () {
+//                connection.send('Ping');
+//            };
+            connection.onerror = function (error) {
+                console.log('WebSocket Error ' + error);
+            };
+
+            // Log messages from the server
+            connection.onmessage = function (e) {
+                console.log('WebSocket Message ' + e.data);
+            };
+        });
+    </script>
+
+    <style>
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
+
+<body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.min.js"></script>
+<script>
+
+    var camera, scene, renderer, geometry, material, mesh;
+
+    init();
+    animate();
+
+    function init() {
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+        camera.position.z = 1000;
+
+        geometry = new THREE.BoxGeometry(200, 200, 200);
+        material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        renderer = new THREE.CanvasRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    function render() {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+
+        renderer.render(scene, camera);
+    }
+
+</script>
+</body>
+</html>
