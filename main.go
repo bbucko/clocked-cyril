@@ -43,7 +43,7 @@ func echo(conn *websocket.Conn) error {
 }
 
 type Page struct {
-	Url string
+	Url    string
 	WsPort string
 }
 
@@ -54,6 +54,9 @@ func main() {
 	wsPort := os.Getenv("WSPORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	if wsPort == "" {
 		wsPort = "8080"
 	}
 
