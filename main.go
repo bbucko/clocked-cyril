@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gorilla/websocket"
-	"log"
-	"html/template"
 	"fmt"
+	"github.com/gorilla/websocket"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -17,7 +17,7 @@ type Message struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin : func(r *http.Request) bool {
+	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
@@ -61,23 +61,23 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			host := strings.Split(r.Host, ":")[0]
-			p := &Page{Url:host, WsPort: wsPort}
-			t, _ := template.ParseFiles("./web/index.html")
-			t.Execute(w, p)
-		})
+		host := strings.Split(r.Host, ":")[0]
+		p := &Page{Url: host, WsPort: wsPort}
+		t, _ := template.ParseFiles("./web/index.html")
+		t.Execute(w, p)
+	})
 
 	http.Handle("/js", http.FileServer(http.Dir("./web/js/")))
 	http.Handle("/img", http.FileServer(http.Dir("./web/img/")))
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r*http.Request) {
-			conn, err := upgrader.Upgrade(w, r, nil)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
-			go echo(conn)
-		})
+		go echo(conn)
+	})
 
 	bind := fmt.Sprintf("%s:%s", host, port)
 	log.Println("Starting server on", bind, "with websocket on port", wsPort)
