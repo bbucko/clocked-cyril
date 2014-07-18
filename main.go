@@ -52,6 +52,7 @@ func main() {
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
 	wsPort := os.Getenv("WSPORT")
+
 	if port == "" {
 		port = "8080"
 	}
@@ -66,6 +67,9 @@ func main() {
 		t, _ := template.ParseFiles("./web/index.html")
 		t.Execute(w, p)
 	})
+	http.HandleFunc("/status", func(w http.ResponseWriter, r*http.Request){
+			fmt.Fprintf(w, "hello, world from %s", os.Environ())
+		})
 
 	http.Handle("/js", http.FileServer(http.Dir("./web/js/")))
 	http.Handle("/img", http.FileServer(http.Dir("./web/img/")))
