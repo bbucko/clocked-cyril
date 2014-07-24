@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"flag"
+	"encoding/json"
 )
 
 type Cell int
@@ -114,6 +115,10 @@ func (b Board) String() string {
 		}
 	}
 	return buffer.String()
+}
+
+func (b Board) MarshalText() ([]byte, error) {
+	return json.Marshal(b.cells)
 }
 
 func debugf(format string, v ...interface{}) {

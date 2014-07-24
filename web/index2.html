@@ -4,10 +4,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            var connection = new WebSocket('ws://localhost:8080/ws');
-//            connection.onopen = function () {
-//                connection.send('Ping');
-//            };
+            var connection = new WebSocket('ws://{{.Url}}:{{.WsPort}}/ws');
             connection.onerror = function (error) {
                 console.log('WebSocket Error ' + error);
             };

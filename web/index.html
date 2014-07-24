@@ -5,17 +5,22 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var connection = new WebSocket('ws://{{.Url}}:{{.WsPort}}/ws');
-            connection.onopen = function () {
-                connection.send('Ping');
-            };
+//            connection.onopen = function () {
+//                connection.send('Welcome');
+//            };
             connection.onerror = function (error) {
                 console.log('WebSocket Error ' + error);
             };
 
             // Log messages from the server
             connection.onmessage = function (e) {
-                console.log('WebSocket Message ' + e.data);
+                var array = JSON.parse(e.data)
+                console.log('WebSocket Message ' + array);
             };
+
+            $("#btn").click(function () {
+                connection.send("close")
+            })
         });
     </script>
 
@@ -68,4 +73,5 @@
 
 </script>
 </body>
+        <input type="button" value="AA" id="btn"/>
 </html>

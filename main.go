@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
+	"github.com/bbucko/clocked-cyril/conway"
+	"html/template"
 	"strings"
 )
 
@@ -22,24 +24,37 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func echo(conn *websocket.Conn) error {
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			return nil
-		}
-		msg := string(p)
-		var rsp = ""
-		if msg == "Ping" {
-			rsp = "Pong"
-		} else {
-			rsp = msg
-		}
-		log.Printf("RQ: %s RS: %s", msg, rsp)
-		if err = conn.WriteMessage(messageType, []byte(rsp)); err != nil {
-			return err
-		}
+func createSeed(size int) [][]conway.Cell {
+	seed := make([][]conway.Cell, size)
+	for i := range seed {
+		seed[i] = make([]conway.Cell, size)
 	}
+	return seed
+}
+
+func startGameOfLife(conn *websocket.Conn) {
+	seed := createSeed(10)
+	seed[4][5] = 1
+	seed[5][5] = 1
+	seed[6][5] = 1
+
+	gol := new(conway.Board)
+	gol.InitWithSeed(10, seed)
+
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				gol.Reaper()
+				err := conn.WriteJSON(gol)
+				if err != nil {
+					log.Println("ticker channel", err)
+					return
+				}
+			}
+		}
+	}()
 }
 
 type Page struct {
@@ -64,24 +79,20 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		host := strings.Split(r.Host, ":")[0]
 		p := &Page{Url: host, WsPort: wsPort}
-		t, _ := template.ParseFiles("./web/index.html")
+		t, _ := template.ParseFiles("./web/index2.html")
 		t.Execute(w, p)
 	})
-	http.HandleFunc("/status", func(w http.ResponseWriter, r*http.Request){
-			fmt.Fprintf(w, "hello, world from %s", os.Environ())
-		})
 
-	http.Handle("/js", http.FileServer(http.Dir("./web/js/")))
-	http.Handle("/img", http.FileServer(http.Dir("./web/img/")))
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Fatal(err)
-			return
 		}
-
-		go echo(conn)
+		go startGameOfLife(conn)
 	})
+
+	http.Handle("/js/", http.FileServer(http.Dir("./web/")))
+	http.Handle("/img/", http.FileServer(http.Dir("./web/")))
 
 	bind := fmt.Sprintf("%s:%s", host, port)
 	log.Println("Starting server on", bind, "with websocket on port", wsPort)
