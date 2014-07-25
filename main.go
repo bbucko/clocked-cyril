@@ -10,6 +10,7 @@ import (
 	"github.com/bbucko/clocked-cyril/conway"
 	"html/template"
 	"strings"
+	mgo "gopkg.in/mgo.v2"
 )
 
 type Message struct {
@@ -62,34 +63,42 @@ type Page struct {
 	WsPort string
 }
 
+func getEnv(key string, defVal string) (env string) {
+	env = os.Getenv(key)
+
+	if env == "" {
+		env = defVal
+	}
+	return
+}
+
 func main() {
 	log.Println("starting...")
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
-	wsPort := os.Getenv("WSPORT")
+	host := getEnv("HOST", "")
+	port := getEnv("PORT", "8080")
+	wsPort := getEnv("WSPORT", "8080")
+	mongoURL := getEnv("MONGOHQ_URL", "localhost")
 
-	if port == "" {
-		port = "8080"
+	session, e := mgo.Dial(mongoURL)
+	if e != nil {
+		log.Fatal(e)
 	}
-
-	if wsPort == "" {
-		wsPort = "8080"
-	}
+	log.Println(session.BuildInfo())
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		host := strings.Split(r.Host, ":")[0]
-		p := &Page{Url: host, WsPort: wsPort}
-		t, _ := template.ParseFiles("./web/index2.html")
-		t.Execute(w, p)
-	})
+			host := strings.Split(r.Host, ":")[0]
+			p := &Page{Url: host, WsPort: wsPort}
+			t, _ := template.ParseFiles("./web/index2.html")
+			t.Execute(w, p)
+		})
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		go startGameOfLife(conn)
-	})
+			conn, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+			go startGameOfLife(conn)
+		})
 
 	http.Handle("/js/", http.FileServer(http.Dir("./web/")))
 	http.Handle("/img/", http.FileServer(http.Dir("./web/")))
