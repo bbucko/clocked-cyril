@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 <head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript">
@@ -28,32 +29,20 @@
 <body>
 </body>
 <script>
-    // You can use either PIXI.WebGLRenderer or PIXI.CanvasRenderer
-    var renderer = new PIXI.WebGLRenderer(800, 600);
+    // create an new instance of a pixi stage
+    var stage = new PIXI.Stage(0x66FF99);
 
+    // create a renderer instance.
+    var renderer = PIXI.autoDetectRenderer(800, 600);
+
+    // add the renderer view element to the DOM
     document.body.appendChild(renderer.view);
 
-    var stage = new PIXI.Stage;
-
-    var bunnyTexture = PIXI.Texture.fromImage("img/bunny.png");
-    var bunny = new PIXI.Sprite(bunnyTexture);
-
-    bunny.position.x = 400;
-    bunny.position.y = 300;
-
-    bunny.scale.x = 2;
-    bunny.scale.y = 2;
-
-    stage.addChild(bunny);
-
-    requestAnimationFrame(animate);
+    requestAnimFrame(animate);
 
     function animate() {
-        bunny.rotation += 0.01;
-
+        requestAnimFrame(animate);
         renderer.render(stage);
-
-        requestAnimationFrame(animate);
     }
 </script>
 
