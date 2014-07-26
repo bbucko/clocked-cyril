@@ -43,12 +43,13 @@ func startGameOfLife(conn *websocket.Conn) {
 	gol.InitWithSeed(10, seed)
 
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(1 * time.Second)
 		for {
 			select {
 			case <-ticker.C:
 				gol.Reaper()
-				err := conn.WriteJSON(gol)
+
+				err := conn.WriteJSON(gol.Cells())
 				if err != nil {
 					log.Println("ticker channel", err)
 					return

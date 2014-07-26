@@ -121,6 +121,10 @@ func (b Board) MarshalText() ([]byte, error) {
 	return json.Marshal(b.cells)
 }
 
+func (b Board) Cells() [][]Cell {
+	return b.cells;
+}
+
 func debugf(format string, v ...interface{}) {
 	if *debug {
 		log.Printf("DEBUG :: "+format, v)
